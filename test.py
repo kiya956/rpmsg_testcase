@@ -12,11 +12,14 @@ def run(cmd):
     return subprocess.check_output(cmd, shell=True, text=True).strip()
 
 
-# ─────────────────────────────────────────────
-# platform remoteproc driver probed
-# ─────────────────────────────────────────────
-def check_remoteproc():
+def chec_device_tree():
     remoteproc = []
+    mailboxs = []
+    vdevbuffer = []
+    vdevring = []
+    rsc_table = []
+
+    # check remoteproc define 
     for root, dirs, files in os.walk("/proc/device-tree/"):
         for d in dirs:
             if "remoteproc" in d:
@@ -28,23 +31,7 @@ def check_remoteproc():
     print("OK: remoteproc are defined:")
     print(remoteproc, sep="\n")
 
-    path = "/sys/class/remoteproc/"
-    if not any(os.scandir(path)):
-        print(
-            f"FAIL: remoteproc instance is not created, please make sure your remoteporc platform is load and be probeded"
-        )
-        return FAIL
-
-    print("OK: remoteproc instance created (platform driver probed)")
-    return SUCCESS
-
-
-# ─────────────────────────────────────────────
-# mailbox channels created
-# (no notifyid here — mailbox does NOT know notifyid)
-# ─────────────────────────────────────────────
-def check_mailbox():
-    mailboxs = []
+    # check mailbox define and interrupt value
     for root, dirs, files in os.walk("/proc/device-tree/"):
         for d in dirs:
             if d.startswith("mailbox"):
@@ -58,15 +45,7 @@ def check_mailbox():
         if not interrupt:
             raise RuntimeError("WARNING: no interrupts is defined for mailbox")
 
-
-# ─────────────────────────────────────────────
-# virtio RPMsg device created
-# (THIS is where remoteproc_virtio has run)
-# ─────────────────────────────────────────────
-def check_virtio_device():
-    vdevbuffer = []
-    vdevring = []
-    rsc_table = []
+    # check virtio device ring buffer and buffer define.
     for root, dirs, files in os.walk("/proc/device-tree/"):
         for d in dirs:
             if "vdev" in d and "buffer" in d:
@@ -91,6 +70,36 @@ def check_virtio_device():
     print("OK: resource table is defined:")
     print(*rsc_table, sep="\n")
 
+
+
+
+# ─────────────────────────────────────────────
+# platform remoteproc driver probed
+# ─────────────────────────────────────────────
+def check_remoteproc():
+    path = "/sys/class/remoteproc/"
+    if not any(os.scandir(path)):
+        print(
+            f"FAIL: remoteproc instance is not created, please make sure your remoteporc platform is load and be probeded"
+        )
+        return FAIL
+
+    print("OK: remoteproc instance created (platform driver probed)")
+    return SUCCESS
+
+
+# ─────────────────────────────────────────────
+# mailbox channels created
+# (no notifyid here — mailbox does NOT know notifyid)
+# ─────────────────────────────────────────────
+def check_mailbox():
+    pass
+
+# ─────────────────────────────────────────────
+# virtio RPMsg device created
+# (THIS is where remoteproc_virtio has run)
+# ─────────────────────────────────────────────
+def check_virtio_device():
     virtio = glob.glob("/sys/bus/virtio/devices/virtio*")
     if not virtio:
         print("WARNING: no virtio devices created by remoteproc")
@@ -146,6 +155,8 @@ def check_rpmsg_devices():
 # ─────────────────────────────────────────────
 def main():
     print("=== RPMsg / remoteproc runtime validation ===")
+
+    chec_device_tree()
 
     if check_remoteproc() == FAIL:
         return
