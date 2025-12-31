@@ -182,23 +182,9 @@ def check_rpmsg_transport(virtio_devices):
     print("FAIL: virtio_rpmsg_bus not bound")
 
 
-# ─────────────────────────────────────────────
-# notifyid (kick id) validation
-# (ONLY VALID HERE — after virtqueues exist)
-# ─────────────────────────────────────────────
-def check_notifyid_runtime():
-    print("INFO: checking notifyid via runtime trace")
-
-    # very rough example: look for notifyid in logs
-    out = run("dmesg | grep -i notify || true")
-    if out:
-        print("OK: notifyid activity seen in logs")
-    else:
-        print("WARN: notifyid not visible in logs (may need tracing)")
-
 
 # ─────────────────────────────────────────────
-# STEP 7: virtio_rpmsg_scan channel(Name Service)
+# virtio_rpmsg_scan channel(Name Service)
 # ─────────────────────────────────────────────
 def check_rpmsg_devices():
     print("virtio_rpmsg_bus scan and register channel")
@@ -228,8 +214,6 @@ def main():
         return
 
     check_rpmsg_transport(virtio)
-
-    check_notifyid_runtime()
 
     rpmsg = check_rpmsg_devices()
 
