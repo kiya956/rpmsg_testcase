@@ -19,6 +19,7 @@ def chec_device_tree():
     vdevring = []
     rsc_table = []
 
+    print("===Check Device Tree===")
     # check remoteproc define
     for root, dirs, files in os.walk("/proc/device-tree/"):
         for d in dirs:
@@ -82,6 +83,7 @@ def chec_device_tree():
 # platform remoteproc driver probed
 # ─────────────────────────────────────────────
 def check_remoteproc():
+    print("===Check Remoteproc===")
     path = "/sys/class/remoteproc/"
     if not any(os.scandir(path)):
         print(
@@ -136,6 +138,7 @@ def check_mailbox():
         re.IGNORECASE | re.VERBOSE,
     )
 
+    print("===Check MailBox===")
     for driver in os.listdir(drivers_path):
         driver_path = os.path.join(drivers_path, driver)
 
@@ -160,6 +163,7 @@ def check_mailbox():
 # (THIS is where remoteproc_virtio has run)
 # ─────────────────────────────────────────────
 def check_virtio_device():
+    print("===Check Virtio===")
     virtio = glob.glob("/sys/bus/virtio/devices/virtio*")
     if not virtio:
         print("WARNING: no virtio devices created by remoteproc")
@@ -172,6 +176,7 @@ def check_virtio_device():
 # RPMsg transport probe (virtio_rpmsg_bus)
 # ─────────────────────────────────────────────
 def check_rpmsg_transport(virtio_devices):
+    print("===Check RPmgs Transport(virtio_rpmsg_bus)===")
     for dev in virtio_devices:
         driver = os.path.join(dev, "driver")
         if os.path.islink(driver):
@@ -187,7 +192,7 @@ def check_rpmsg_transport(virtio_devices):
 # virtio_rpmsg_scan channel(Name Service)
 # ─────────────────────────────────────────────
 def check_rpmsg_devices():
-    print("virtio_rpmsg_bus scan and register channel")
+    print("===check virtio_rpmsg_bus scan and register channel===")
     devices = glob.glob("/sys/bus/rpmsg/devices/*")
     if not devices:
         print("WARNING: no rpmsg devices is created")
