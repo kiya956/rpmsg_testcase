@@ -27,9 +27,9 @@ def chec_device_tree():
 
     if not remoteproc:
         print("WARNING: remoteproc is not defind in device tree")
-        return
-    print("OK: remoteproc are defined:")
-    print(remoteproc, sep="\n")
+    else:
+        print("OK: remoteproc are defined:")
+        print(remoteproc, sep="\n")
 
     # check mailbox define and interrupt value
     for root, dirs, files in os.walk("/proc/device-tree/"):
@@ -38,12 +38,16 @@ def chec_device_tree():
                 mailboxs.append(os.path.join(root, d))
     if not mailboxs:
         print("WARNING: no mailbox is defined in device-tree")
+    else:
+        print("OK: mailbox defined is found")
 
     for node in mailboxs:
         dts = run(f"dtc -qqq -f -I fs -O dts {node}")
         interrupt = re.search(r"\binterrupts\s*=\s*<([^>]+)>;", dts)
         if not interrupt:
-            raise RuntimeError("WARNING: no interrupts is defined for mailbox")
+            print("WARNING: no interrupts is defined for mailbox")
+        else:
+            print("OK: interrupt defined is found for mailbox")
 
     # check virtio device ring buffer and buffer define.
     for root, dirs, files in os.walk("/proc/device-tree/"):
@@ -57,18 +61,21 @@ def chec_device_tree():
 
     if not vdevbuffer:
         print("WARNING: vdevbuffer is not defined")
-    print("OK: vdevbuffer define:")
-    print(*vdevbuffer, sep="\n")
+    else:
+        print("OK: vdevbuffer define:")
+        print(*vdevbuffer, sep="\n")
 
     if not vdevring:
         print("WARNING: vdev vrings are not defined")
-    print("OK: vdev vring is are defined:")
-    print(*vdevring, sep="\n")
+    else:
+        print("OK: vdev vring is are defined:")
+        print(*vdevring, sep="\n")
 
     if not rsc_table:
         print("WARNING: resource table is not defined")
-    print("OK: resource table is defined:")
-    print(*rsc_table, sep="\n")
+    else:
+        print("OK: resource table is defined:")
+        print(*rsc_table, sep="\n")
 
 
 # ─────────────────────────────────────────────
@@ -80,10 +87,9 @@ def check_remoteproc():
         print(
             f"FAIL: remoteproc instance is not created, please make sure your remoteporc platform is load and be probeded"
         )
-        return FAIL
+        return
 
     print("OK: remoteproc instance created (platform driver probed)")
-    return SUCCESS
 
 
 # ─────────────────────────────────────────────
@@ -144,9 +150,9 @@ def check_mailbox():
 
     if not mailboxs:
         print("WARNING: No mailbox driver be probed")
-        return
-    print("OK: Mailbox driver found")
-    print(*mailboxs, sep="\n")
+    else:
+        print("OK: Mailbox driver found")
+        print(*mailboxs, sep="\n")
 
 
 # ─────────────────────────────────────────────
@@ -173,7 +179,7 @@ def check_rpmsg_transport(virtio_devices):
             if "virtio_rpmsg_bus" in drv:
                 print(f"OK: rpmsg transport bound to {dev}")
                 return
-    raise RuntimeError("FAIL: virtio_rpmsg_bus not bound")
+    print("FAIL: virtio_rpmsg_bus not bound")
 
 
 # ─────────────────────────────────────────────
