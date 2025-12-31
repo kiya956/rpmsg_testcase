@@ -19,7 +19,7 @@ def chec_device_tree():
     vdevring = []
     rsc_table = []
 
-    # check remoteproc define 
+    # check remoteproc define
     for root, dirs, files in os.walk("/proc/device-tree/"):
         for d in dirs:
             if "remoteproc" in d:
@@ -71,8 +71,6 @@ def chec_device_tree():
     print(*rsc_table, sep="\n")
 
 
-
-
 # ─────────────────────────────────────────────
 # platform remoteproc driver probed
 # ─────────────────────────────────────────────
@@ -92,8 +90,64 @@ def check_remoteproc():
 # mailbox channels created
 # (no notifyid here — mailbox does NOT know notifyid)
 # ─────────────────────────────────────────────
+def has_bound_device(driver_path):
+    """
+    A bound platform device usually appears as a symlink whose
+    name looks like a hex address or device identifier.
+    """
+    upstream_drivers = re.compile(
+        r"(mailbox|mbox|mhu|ipcc|msgbox|hsp|ipi|mu)", re.IGNORECASE
+    )
+
+    try:
+        for entry in os.listdir(driver_path):
+            # platform device names are often hex-like or numeric
+            if re.match(r"^[0-9a-fA-F]", entry):
+                return True
+    except OSError:
+        pass
+    return False
+
+
 def check_mailbox():
-    pass
+    mailboxs = []
+    drivers_path = "/sys/bus/platform/drivers"
+    upstream_supports = re.compile(
+        r"""
+      (
+          mailbox            |   # explicit mailbox drivers
+          -mailbox           |
+          mailbox-           |
+          -ipi$              |   # zynqmp-ipi, ti-ipi
+          _ipi$              |
+          ipcc               |   # stm32-ipcc, qcom-ipcc
+          msgbox             |   # sun6i-msgbox
+          hsp                |   # tegra-hsp
+          mhu                |   # arm_mhu, arm_mhuv2
+          (^|[-_])mu($|[-_])     # imx-mu, imx_mu
+      )
+      """,
+        re.IGNORECASE | re.VERBOSE,
+    )
+
+    for driver in os.listdir(drivers_path):
+        driver_path = os.path.join(drivers_path, driver)
+
+        if not os.path.isdir(driver_path):
+            continue
+
+        if not upstream_supports.search(driver):
+            continue
+
+        if has_bound_device(driver_path):
+            mailboxs.append(driver)
+
+    if not mailboxs:
+        print("WARNING: No mailbox driver be probed")
+        return
+    print("OK: Mailbox driver found")
+    print(*mailboxs, sep="\n")
+
 
 # ─────────────────────────────────────────────
 # virtio RPMsg device created
