@@ -204,20 +204,18 @@ def main():
 
     chec_device_tree()
 
-    if check_remoteproc() == FAIL:
-        return
+    check_remoteproc()
 
     check_mailbox()
 
     virtio = check_virtio_device()
     if not virtio:
-        return
-
-    check_rpmsg_transport(virtio)
+        pass
+    else:
+        check_rpmsg_transport(virtio)
 
     rpmsg = check_rpmsg_devices()
 
-    print("=== ALL CHECKS PASSED ===")
 
 
 if __name__ == "__main__":
