@@ -2,7 +2,6 @@ import os
 import re
 import glob
 import subprocess
-import time
 
 SUCCESS = 0
 FAIL = 1
@@ -87,8 +86,9 @@ def check_remoteproc():
     path = "/sys/class/remoteproc/"
     if not any(os.scandir(path)):
         print(
-            f"FAIL: remoteproc instance is not created, please make sure your remoteporc platform is load and be probeded",
-            "Please Ignore this on Qualcomm platform"
+            "FAIL: remoteproc instance is not created; please make sure your "
+            "remoteproc platform is loaded and probed. "
+            "Please ignore this on Qualcomm platforms."
         )
         return
 
@@ -104,9 +104,6 @@ def has_bound_device(driver_path):
     A bound platform device usually appears as a symlink whose
     name looks like a hex address or device identifier.
     """
-    upstream_drivers = re.compile(
-        r"(mailbox|mbox|mhu|ipcc|msgbox|hsp|ipi|mu)", re.IGNORECASE
-    )
 
     try:
         for entry in os.listdir(driver_path):
@@ -153,7 +150,10 @@ def check_mailbox():
             mailboxs.append(driver)
 
     if not mailboxs:
-        print("WARNING: No mailbox driver be probed (Please ignore this message on Qualcomm platform)")
+        print(
+            "WARNING: No mailbox driver be probed. "
+            "(Please ignore this message on Qualcomm platform)"
+        )
     else:
         print("OK: Mailbox driver found")
         print(*mailboxs, sep="\n")
@@ -167,7 +167,10 @@ def check_virtio_device():
     print("===Check Virtio===")
     virtio = glob.glob("/sys/bus/virtio/devices/virtio*")
     if not virtio:
-        print("WARNING: no virtio devices created by remoteproc (Please ignore this message on Qualcomm platform)")
+        print(
+            "WARNING: no virtio devices created by remoteproc. "
+            "(Please ignore this message on Qualcomm platform)"
+        )
         return
     print(f"OK: virtio devices present: {virtio}")
     return virtio
@@ -186,7 +189,6 @@ def check_rpmsg_transport(virtio_devices):
                 print(f"OK: rpmsg transport bound to {dev}")
                 return
     print("FAIL: virtio_rpmsg_bus not bound")
-
 
 
 # ─────────────────────────────────────────────
@@ -220,8 +222,7 @@ def main():
     else:
         check_rpmsg_transport(virtio)
 
-    rpmsg = check_rpmsg_devices()
-
+    check_rpmsg_devices()
 
 
 if __name__ == "__main__":
