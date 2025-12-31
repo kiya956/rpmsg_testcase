@@ -87,7 +87,8 @@ def check_remoteproc():
     path = "/sys/class/remoteproc/"
     if not any(os.scandir(path)):
         print(
-            f"FAIL: remoteproc instance is not created, please make sure your remoteporc platform is load and be probeded"
+            f"FAIL: remoteproc instance is not created, please make sure your remoteporc platform is load and be probeded",
+            "Please Ignore this on Qualcomm platform"
         )
         return
 
@@ -152,7 +153,7 @@ def check_mailbox():
             mailboxs.append(driver)
 
     if not mailboxs:
-        print("WARNING: No mailbox driver be probed")
+        print("WARNING: No mailbox driver be probed (Please ignore this message on Qualcomm platform)")
     else:
         print("OK: Mailbox driver found")
         print(*mailboxs, sep="\n")
@@ -166,7 +167,7 @@ def check_virtio_device():
     print("===Check Virtio===")
     virtio = glob.glob("/sys/bus/virtio/devices/virtio*")
     if not virtio:
-        print("WARNING: no virtio devices created by remoteproc")
+        print("WARNING: no virtio devices created by remoteproc (Please ignore this message on Qualcomm platform)")
         return
     print(f"OK: virtio devices present: {virtio}")
     return virtio
